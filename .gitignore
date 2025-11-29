@@ -1,0 +1,4 @@
+node_modules
+.env
+Backend/pacakage-lock.json
+dist
