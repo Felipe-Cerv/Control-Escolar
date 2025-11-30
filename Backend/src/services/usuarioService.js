@@ -20,8 +20,12 @@ export async function verifyPassword(password, passwordHash) {
     return bcrypt.compare(password, passwordHash);
 }
 
+export async function getRoles(usuario_id) {
+    return models.UsuarioRol.findAll({ where: { usuario_id } });
+}
+
 class UserService {
-    async crearUsuario({ nombre, email, password, fecha_nacimiento }) {
+    async crearUsuario({ nombre, email, password, fecha_nacimiento, rol_id }) {
         const existing = await findByEmail(email);
         if (existing) throw new ConflictError('El correo ya está registrado');
         if(!nombre || !email || !password || !fecha_nacimiento){
@@ -29,7 +33,7 @@ class UserService {
         }
         const password_hash = await hashPassword(password);
         const newUser = await models.Usuario.create({ nombre, email, password_hash, fecha_nacimiento });
-        await UsuarioRol.create({ usuario_id: newUser.usuario_id, rol_id: 1});
+        await UsuarioRol.create({ usuario_id: newUser.usuario_id, rol_id: rol_id});
         const { password_hash: _, ...clean } = newUser.toJSON();
         return clean;
     }
@@ -37,11 +41,10 @@ class UserService {
     async autenticarUsuario({ email, password }) {
         const user = await findByEmail(email);
         if (!user) throw new NotFoundError('No existe un usuario con ese correo');
-
+        const roles = await getRoles(user.usuario_id);
         const verified = await verifyPassword(password, user.password_hash);
         if (!verified) throw new UnauthorizedError('Contraseña incorrecta');
-
-        const token = jwt.sign({ usuario_id: user.usuario_id, email: user.email }, JWT_SECRET, {
+        const token = jwt.sign({ usuario_id: user.usuario_id, email: user.email, roles:[roles] }, JWT_SECRET, {
             expiresIn: '30m',
         });
 

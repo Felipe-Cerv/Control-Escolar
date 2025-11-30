@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import loginRoute from './routes/loginRoute.js';
+//import alumnoRoutes from './routes/alumnoRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
@@ -12,7 +14,9 @@ app.use(helmet());
 app.use(express.json());
 
 // Registrar rutas
-app.use('/api/auth', usuarioRoutes);
+app.use('/api/auth', loginRoute);
+app.use('/api/usuarios', usuarioRoutes);
+//app.use('api/alumnos', alumnoRoutes);
 
 // Error handler - should be last middleware
 app.use(errorHandler);
