@@ -1,6 +1,5 @@
 import UsuarioService from '../services/usuarioService.js';
 import AppError from '../errors/AppError.js';
-import NotFoundError from '../errors/NotFoundError.js';
 
 export const loginUser = async (req, res) => {
   try {
@@ -24,4 +23,14 @@ export const crearUsuario = async (req, res) => {
   }
 };
 
-export default { loginUser, crearUsuario };
+export const modificarRolUsuario = async (req, res) => {
+  try {
+    const { usuario_id, rol_id } = req.body;
+    const result = await UsuarioService.modificarRolUsuario({ usuario_id, rol_id });
+    return res.status(200).json({ ok: true, data: result });
+  } catch (error) {
+    if (error instanceof AppError) return res.status(error.status).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
+  }
+};
+export default { loginUser, crearUsuario, modificarRolUsuario };

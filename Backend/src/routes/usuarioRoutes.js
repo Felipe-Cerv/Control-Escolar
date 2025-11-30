@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { crearUsuario } from '../controllers/usuarioController.js';
+import { crearUsuario, modificarRolUsuario } from '../controllers/usuarioController.js';
 import { body } from 'express-validator';
 import validateRequest from '../middleware/validateRequest.js';
 import auth from '../middleware/auth.js';
@@ -17,4 +17,9 @@ router.post('/', auth, requireRole(Roles.ADMINISTRADOR), [
     validateRequest,
 ], crearUsuario);
 
+router.patch('/rolUsuario/', auth, requireRole(Roles.ADMINISTRADOR), [
+    body('usuario_id').isInt().withMessage('Debe proporcionar un ID de usuario válido'),
+    body('rol_id').isInt().withMessage('Debe proporcionar un rol válido'),
+    validateRequest,
+], modificarRolUsuario);
 export default router;

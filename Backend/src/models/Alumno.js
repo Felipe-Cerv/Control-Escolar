@@ -7,7 +7,17 @@ const Alumno = sequelize.define(
   {
     alumno_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     matricula: { type: DataTypes.STRING(10), unique: true },
-    usuario_id: { type: DataTypes.INTEGER, references: { model: Usuario, key: "usuario_id" }}
+    usuario_id: { type: DataTypes.INTEGER, unique: true, references: { model: Usuario, key: "usuario_id" } },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: "alumnos",

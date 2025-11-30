@@ -4,6 +4,7 @@ import AlumnoGrupoPeriodo from "./AlumnoGrupoPeriodo.js";
 import GrupoMateriaMaestro from "./GrupoMateriaMaestro.js";
 import Periodo from "./Periodo.js";
 import EstatusCalificacion from "./EstatusCalificacion.js";
+import { now } from "sequelize/lib/utils";
 
 const Calificacion = sequelize.define(
   "Calificacion",
@@ -33,7 +34,7 @@ const Calificacion = sequelize.define(
     observaciones: { type: DataTypes.TEXT },
 
     fecha_registro: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    EstatusCalificacionId: {
+    estatus_calificacion_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: EstatusCalificacion, key: "estatus_calificacion_id" }

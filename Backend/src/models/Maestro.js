@@ -7,7 +7,7 @@ const Maestro = sequelize.define(
   {
     maestro_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     matricula: { type: DataTypes.STRING(10) },
-    usuario_id: { type: DataTypes.INTEGER, references: { model: Usuario, key: "usuario_id" }},
+    usuario_id: { type: DataTypes.INTEGER, unique: true, references: { model: Usuario, key: "usuario_id" }},
   },
   { tableName: "maestros", timestamps: false }
 );

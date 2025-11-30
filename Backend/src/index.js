@@ -3,7 +3,7 @@ import env from './config/enviroment.js';
 import app from './app.js';
 import sequelize from './config/sequelize.js';
 
-sequelize.sync( {alter: false})
+sequelize.sync( {force: true})
     .then(() => console.log("Tablas sincronizadas"))
     .catch(err => console.error("Error sync:", err));
 

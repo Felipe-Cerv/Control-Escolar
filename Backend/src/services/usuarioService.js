@@ -28,14 +28,12 @@ class UserService {
     async crearUsuario({ nombre, email, password, fecha_nacimiento, rol_id }) {
         const existing = await findByEmail(email);
         if (existing) throw new ConflictError('El correo ya está registrado');
-        if(!nombre || !email || !password || !fecha_nacimiento){
-            throw new BadRequestError('Faltan datos obligatorios para crear el usuario');
-        }
+
         const password_hash = await hashPassword(password);
         const newUser = await models.Usuario.create({ nombre, email, password_hash, fecha_nacimiento });
-        await UsuarioRol.create({ usuario_id: newUser.usuario_id, rol_id: rol_id});
-        const { password_hash: _, ...clean } = newUser.toJSON();
-        return clean;
+        await UsuarioRol.create({ usuario_id: newUser.usuario_id, rol_id: rol_id });
+        const { password_hash: _, ...response } = newUser.toJSON();
+        return response;
     }
 
     async autenticarUsuario({ email, password }) {
@@ -44,12 +42,20 @@ class UserService {
         const roles = await getRoles(user.usuario_id);
         const verified = await verifyPassword(password, user.password_hash);
         if (!verified) throw new UnauthorizedError('Contraseña incorrecta');
-        const token = jwt.sign({ usuario_id: user.usuario_id, email: user.email, roles:[roles] }, JWT_SECRET, {
+        const token = jwt.sign({ usuario_id: user.usuario_id, email: user.email, roles: [roles] }, JWT_SECRET, {
             expiresIn: '30m',
         });
 
-        const { password_hash, ...userSafe } = user.toJSON();
-        return { token, user: userSafe };
+        const { password_hash: _, ...response } = user.toJSON();
+        return { token, user: response };
+    }
+
+    async modificarRolUsuario({ usuario_id, rol_id }) {
+        await models.UsuarioRol.update(
+            { rol_id },
+            { where: { usuario_id } }
+        );
+        return;
     }
 }
 

@@ -9,6 +9,16 @@ const Usuario = sequelize.define(
     email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
     password_hash: { type: DataTypes.STRING(255), allowNull: false },
     fecha_nacimiento: { type: DataTypes.DATE },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: "usuarios",
