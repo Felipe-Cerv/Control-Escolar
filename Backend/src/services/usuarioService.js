@@ -5,8 +5,6 @@ import { JWT_SECRET } from '../config/enviroment.js';
 import { ConflictError } from '../errors/ConflictError.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
 import { UnauthorizedError } from '../errors/UnauthorizedError.js';
-import BadRequestError from '../errors/BadRequestError.js';
-import UsuarioRol from '../models/UsuarioRol.js';
 
 export async function findByEmail(email) {
     return models.Usuario.findOne({ where: { email } });
@@ -25,13 +23,17 @@ export async function getRoles(usuario_id) {
 }
 
 class UserService {
+    async findById(id) {
+        return models.Usuario.findOne({ where: { usuario_id: id } });
+    }
+
     async crearUsuario({ nombre, email, password, fecha_nacimiento, rol_id }) {
         const existing = await findByEmail(email);
         if (existing) throw new ConflictError('El correo ya está registrado');
 
         const password_hash = await hashPassword(password);
         const newUser = await models.Usuario.create({ nombre, email, password_hash, fecha_nacimiento });
-        await UsuarioRol.create({ usuario_id: newUser.usuario_id, rol_id: rol_id });
+        await models.UsuarioRol.create({ usuario_id: newUser.usuario_id, rol_id: rol_id });
         const { password_hash: _, ...response } = newUser.toJSON();
         return response;
     }

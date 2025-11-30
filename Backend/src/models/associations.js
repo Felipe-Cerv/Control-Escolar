@@ -1,4 +1,3 @@
-
 export default function applyAssociations(models) {
     const {
         Usuario,
@@ -16,87 +15,174 @@ export default function applyAssociations(models) {
         Calificacion
     } = models;
 
-    // relacion usuario-Rol 
+    // ============================
+    // Usuario - Rol
+    // ============================
     Usuario.belongsToMany(Rol, {
         through: UsuarioRol,
-        foreignKey: "usuario_id"
+        foreignKey: "usuario_id",
+        as: "roles"
     });
 
     Rol.belongsToMany(Usuario, {
         through: UsuarioRol,
-        foreignKey: "rol_id"
+        foreignKey: "rol_id",
+        as: "usuarios"
     });
 
-    // relacion usuario alumno
+    // ============================
+    // Usuario - Alumno
+    // ============================
     Usuario.hasOne(Alumno, {
-        foreignKey: "usuario_id"
+        foreignKey: "usuario_id",
+        as: "alumno"
     });
+
     Alumno.belongsTo(Usuario, {
-        foreignKey: "usuario_id"
+        foreignKey: "usuario_id",
+        as: "usuario"
     });
 
-    // relacion usuario maestro
+    // ============================
+    // Usuario - Maestro
+    // ============================
     Usuario.hasOne(Maestro, {
-        foreignKey: "usuario_id"
+        foreignKey: "usuario_id",
+        as: "maestro"
     });
+
     Maestro.belongsTo(Usuario, {
-        foreignKey: "usuario_id"
+        foreignKey: "usuario_id",
+        as: "usuario"
     });
 
-    // relacion periodo estatus
+    // ============================
+    // EstatusPeriodo - Periodo
+    // ============================
     EstatusPeriodo.hasMany(Periodo, {
-        foreignKey: "estatus_periodo_id"
+        foreignKey: "estatus_periodo_id",
+        as: "periodos"
     });
+
     Periodo.belongsTo(EstatusPeriodo, {
-        foreignKey: "estatus_periodo_id"
+        foreignKey: "estatus_periodo_id",
+        as: "estatus_periodo"
     });
 
-    // relacion grupo-materia-maestro
-    Grupo.hasMany(GrupoMateriaMaestro, { foreignKey: "grupo_id" });
-    GrupoMateriaMaestro.belongsTo(Grupo, { foreignKey: "grupo_id" });
+    // ============================
+    // Grupo - GrupoMateriaMaestro
+    // ============================
+    Grupo.hasMany(GrupoMateriaMaestro, {
+        foreignKey: "grupo_id",
+        as: "grupo_materia_maestro"
+    });
 
-    Materia.hasMany(GrupoMateriaMaestro, { foreignKey: "materia_id" });
-    GrupoMateriaMaestro.belongsTo(Materia, { foreignKey: "materia_id" });
+    GrupoMateriaMaestro.belongsTo(Grupo, {
+        foreignKey: "grupo_id",
+        as: "grupo"
+    });
 
-    Maestro.hasMany(GrupoMateriaMaestro, { foreignKey: "maestro_id" });
-    GrupoMateriaMaestro.belongsTo(Maestro, { foreignKey: "maestro_id" });
+    // ============================
+    // Materia - GrupoMateriaMaestro
+    // ============================
+    Materia.hasMany(GrupoMateriaMaestro, {
+        foreignKey: "materia_id",
+        as: "grupo_materia_maestro"
+    });
 
-    // relacion alumno-grupo-periodo
-    Alumno.hasMany(AlumnoGrupoPeriodo, { foreignKey: "alumno_id" });
-    AlumnoGrupoPeriodo.belongsTo(Alumno, { foreignKey: "alumno_id" });
+    GrupoMateriaMaestro.belongsTo(Materia, {
+        foreignKey: "materia_id",
+        as: "materia"    
+    });
 
-    Grupo.hasMany(AlumnoGrupoPeriodo, { foreignKey: "grupo_id" });
-    AlumnoGrupoPeriodo.belongsTo(Grupo, { foreignKey: "grupo_id" });
+    // ============================
+    // Maestro - GrupoMateriaMaestro
+    // ============================
+    Maestro.hasMany(GrupoMateriaMaestro, {
+        foreignKey: "maestro_id",
+        as: "grupo_materia_maestro"
+    });
 
-    Periodo.hasMany(AlumnoGrupoPeriodo, { foreignKey: "periodo_id" });
-    AlumnoGrupoPeriodo.belongsTo(Periodo, { foreignKey: "periodo_id" });
+    GrupoMateriaMaestro.belongsTo(Maestro, {
+        foreignKey: "maestro_id",
+        as: "maestro"
+    });
 
-    // relacion Calificacion
+    // ============================
+    // Alumno - AlumnoGrupoPeriodo
+    // ============================
+    Alumno.hasMany(AlumnoGrupoPeriodo, {
+        foreignKey: "alumno_id",
+        as: "alumno_grupo_periodo"
+    });
+
+    AlumnoGrupoPeriodo.belongsTo(Alumno, {
+        foreignKey: "alumno_id",
+        as: "alumno"
+    });
+
+    // ============================
+    // Grupo - AlumnoGrupoPeriodo
+    // ============================
+    Grupo.hasMany(AlumnoGrupoPeriodo, {
+        foreignKey: "grupo_id",
+        as: "alumno_grupo_periodo"
+    });
+
+    AlumnoGrupoPeriodo.belongsTo(Grupo, {
+        foreignKey: "grupo_id",
+        as: "grupo"
+    });
+
+    // ============================
+    // Periodo - AlumnoGrupoPeriodo
+    // ============================
+    Periodo.hasMany(AlumnoGrupoPeriodo, {
+        foreignKey: "periodo_id",
+        as: "alumno_grupo_periodo"
+    });
+
+    AlumnoGrupoPeriodo.belongsTo(Periodo, {
+        foreignKey: "periodo_id",
+        as: "periodo"
+    });
+
+    // ============================
+    // AlumnoGrupoPeriodo - Calificacion
+    // ============================
     AlumnoGrupoPeriodo.hasMany(Calificacion, {
-        foreignKey: "alumno_grupo_periodo_id"
+        foreignKey: "alumno_grupo_periodo_id",
+        as: "calificaciones"
     });
+
     Calificacion.belongsTo(AlumnoGrupoPeriodo, {
-        foreignKey: "alumno_grupo_periodo_id"
+        foreignKey: "alumno_grupo_periodo_id",
+        as: "alumno_grupo_periodo"
     });
 
+    // ============================
+    // GrupoMateriaMaestro - Calificacion
+    // ============================
     GrupoMateriaMaestro.hasMany(Calificacion, {
-        foreignKey: "grupo_materia_maestro_id"
+        foreignKey: "grupo_materia_maestro_id",
+        as: "calificaciones"
     });
+
     Calificacion.belongsTo(GrupoMateriaMaestro, {
-        foreignKey: "grupo_materia_maestro_id"
+        foreignKey: "grupo_materia_maestro_id",
+        as: "grupo_materia_maestro"
     });
 
-    Periodo.hasMany(Calificacion, {
-        foreignKey: "periodo_id"
-    });
-    Calificacion.belongsTo(Periodo, {
-        foreignKey: "periodo_id"
-    });
-
+    // ============================
+    // EstatusCalificacion - Calificacion
+    // ============================
     EstatusCalificacion.hasMany(Calificacion, {
-        foreignKey: "estatus_calificacion_id"
+        foreignKey: "estatus_calificacion_id",
+        as: "calificaciones"
     });
+
     Calificacion.belongsTo(EstatusCalificacion, {
-        foreignKey: "estatus_calificacion_id"
+        foreignKey: "estatus_calificacion_id",
+        as: "estatus_calificacion"
     });
 }

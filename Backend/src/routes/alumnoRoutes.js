@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { crearUsuario } from '../controllers/usuarioController.js';
-import { body } from 'express-validator';
+import { body, query } from 'express-validator';
 import validateRequest from '../middleware/validateRequest.js';
+import { obtenerAlumnoPorMatricula } from '../controllers/alumnosController.js';
 const router = Router();
 
 router.post('/', [
@@ -12,4 +13,10 @@ router.post('/', [
     validateRequest,
 ], crearUsuario);
 
+router.get('/',[
+    query('matricula').isString().notEmpty().withMessage('La matrícula es obligatoria'),
+    validateRequest,
+],obtenerAlumnoPorMatricula);
+
+router.get()
 export default router;

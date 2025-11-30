@@ -6,6 +6,8 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 import loginRoute from './routes/loginRoute.js';
 //import alumnoRoutes from './routes/alumnoRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
+import adminRoutes from './routes/adminRoutes.js';
+import alumnoRoutes from './routes/alumnoRoutes.js';
 
 const app = express();
 
@@ -16,6 +18,8 @@ app.use(express.json());
 // Registrar rutas
 app.use('/api/auth', loginRoute);
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/alumnos', alumnoRoutes);
 //app.use('api/alumnos', alumnoRoutes);
 
 // Error handler - should be last middleware
