@@ -1,0 +1,8 @@
+export { default as DashboardAdmin } from './pages/DashboardAdmin'
+export { default as GestionUsuarios } from './pages/GestionUsuarios'
+export { default as GestionGrupos } from './pages/GestionGrupos'
+export { default as GestionMaterias } from './pages/GestionMaterias'
+export { default as Reportes } from './pages/Reportes'
+export { default as CalificacionesAlumno } from './pages/CalificacionesAlumno'
+export { default as TodasCalificaciones } from './pages/TodasCalificaciones'
+export { default as CalificacionesMateria } from './pages/CalificacionesMateria'

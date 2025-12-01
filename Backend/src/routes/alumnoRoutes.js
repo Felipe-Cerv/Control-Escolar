@@ -18,5 +18,4 @@ router.get('/',[
     validateRequest,
 ],obtenerAlumnoPorMatricula);
 
-router.get()
 export default router;

@@ -102,16 +102,38 @@ export class CalificacionService {
     async obtenerCalificacionesPorAlumno(alumno_id) {
         const result = await models.Calificacion.findAll({
             attributes: [
+                [Sequelize.col('grupo_materia_maestro->materia.codigo'), 'codigo'],
                 [Sequelize.col('grupo_materia_maestro->materia.nombre'), 'materia'],
                 [Sequelize.col('Calificacion.nota'), 'nota'],
+                [Sequelize.col('grupo_materia_maestro->maestro->usuario.nombre'), 'maestro'],
             ],
             include: [
                 {
-                    model: models.GrupoMateriaMaestro, as: 'grupo_materia_maestro',
+                    model: models.AlumnoGrupoPeriodo,
+                    as: 'alumno_grupo_periodo',
+                    attributes: []
+                },
+                {
+                    model: models.GrupoMateriaMaestro,
+                    as: 'grupo_materia_maestro',
+                    attributes: [],
                     include: [
                         {
-                            model: models.Materia, as: 'materias',
+                            model: models.Materia,
+                            as: 'materia',
                             attributes: []
+                        },
+                        {
+                            model: models.Maestro,
+                            as: 'maestro',
+                            attributes: [],
+                            include: [
+                                {
+                                    model: models.Usuario,
+                                    as: 'usuario',
+                                    attributes: []
+                                }
+                            ]
                         }
                     ]
                 }
@@ -119,9 +141,78 @@ export class CalificacionService {
             where: {
                 ['$alumno_grupo_periodo.alumno_id$']: alumno_id
             },
+            raw: true
         });
 
-        return result;
+        // Map results to clean format: codigo, materia, nota, maestro
+        const mapped = result.map((row) => ({
+            codigo: row.codigo,
+            materia: row.materia,
+            nota: row.nota,
+            maestro: row.maestro
+        }));
+
+        return mapped;
+    }
+
+    async obtenerCalificacionesDeMaestro(maestro_id) {
+        const result = await models.Calificacion.findAll({
+            attributes: [
+                [Sequelize.col('calificacion_id'), 'calificacion_id'],
+                [Sequelize.col('alumno_grupo_periodo->alumno.matricula'), 'matricula'],
+                [Sequelize.col('alumno_grupo_periodo->alumno->usuario.nombre'), 'alumno'],
+                [Sequelize.col('grupo_materia_maestro->materia.nombre'), 'materia'],
+                [Sequelize.col('alumno_grupo_periodo->grupo.descripcion'), 'grupo'],
+                [Sequelize.col('Calificacion.nota'), 'nota'],
+                [Sequelize.col('Calificacion.observaciones'), 'observaciones'],
+            ],
+            include: [
+                {
+                    model: models.GrupoMateriaMaestro,
+                    as: 'grupo_materia_maestro',
+                    attributes: [],
+                    include: [
+                        { model: models.Materia, as: 'materia', attributes: [] },
+                        { model: models.Maestro, as: 'maestro', attributes: [] }
+                    ]
+                },
+                {
+                    model: models.AlumnoGrupoPeriodo,
+                    as: 'alumno_grupo_periodo',
+                    attributes: [],
+                    include: [
+                        {
+                            model: models.Alumno,
+                            as: 'alumno',
+                            attributes: [],
+                            include: [
+                                { model: models.Usuario, as: 'usuario', attributes: [] }
+                            ]
+                        },
+                        { model: models.Grupo, as: 'grupo', attributes: [] }
+                    ]
+                }
+            ],
+            where: {
+                ['$grupo_materia_maestro.maestro_id$']: maestro_id
+            },
+            raw: true
+        });
+
+        const mapped = result.map((row) => {
+            const notaNum = row.nota === null || row.nota === undefined ? null : Number(Number(row.nota).toFixed(2));
+            return {
+                calificacion_id: row.calificacion_id,
+                matricula: row.matricula,
+                alumno: row.alumno,
+                materia: row.materia,
+                grupo: row.grupo,
+                nota: notaNum,
+                observaciones: row.observaciones || ''
+            };
+        });
+
+        return mapped;
     }
 
     async cambiarCalificacion({ calificacion_id, nueva_nota }) {
