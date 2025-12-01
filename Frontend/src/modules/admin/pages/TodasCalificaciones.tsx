@@ -6,6 +6,31 @@ export default function TodasCalificaciones() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [calificaciones, setCalificaciones] = useState<any[]>([])
+    const [sortBy, setSortBy] = useState<'nombre' | 'promedio' | null>(null)
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+    const handleSort = (field: 'nombre' | 'promedio') => {
+        if (sortBy === field) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortBy(field)
+            setSortOrder('asc')
+        }
+    }
+
+    const sortedCalificaciones = [...calificaciones].sort((a, b) => {
+        if (!sortBy) return 0
+        
+        let comparison = 0
+        if (sortBy === 'nombre') {
+            comparison = a.nombre.localeCompare(b.nombre)
+        } else if (sortBy === 'promedio') {
+            comparison = parseFloat(a.promedio) - parseFloat(b.promedio)
+        }
+        
+        return sortOrder === 'asc' ? comparison : -comparison
+    })
+
     const promedioTotal = calificaciones.length
         ? calificaciones.reduce((sum, c) => sum + (Number(c.promedio) || 0), 0) / calificaciones.length
         : 0
@@ -61,12 +86,32 @@ export default function TodasCalificaciones() {
                             <thead>
                                 <tr className="bg-gray-100 text-gray-700">
                                     <th className="p-2 text-center">Matrícula</th>
-                                    <th className="p-2 text-center">Alumno</th>
-                                    <th className="p-2 text-center">Promedio <span className="font-normal text-xs text-gray-500">(Total: {promedioTotal.toFixed(2)})</span></th>
+                                    <th className="p-2 text-center">
+                                        <button 
+                                            onClick={() => handleSort('nombre')} 
+                                            className="flex items-center justify-center gap-1 w-full hover:text-indigo-600 transition-colors"
+                                        >
+                                            Alumno
+                                            {sortBy === 'nombre' && (
+                                                <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                                            )}
+                                        </button>
+                                    </th>
+                                    <th className="p-2 text-center">
+                                        <button 
+                                            onClick={() => handleSort('promedio')} 
+                                            className="flex items-center justify-center gap-1 w-full hover:text-indigo-600 transition-colors"
+                                        >
+                                            Promedio <span className="font-normal text-xs text-gray-500">(Total: {promedioTotal.toFixed(2)})</span>
+                                            {sortBy === 'promedio' && (
+                                                <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                                            )}
+                                        </button>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {calificaciones.map((c, i) => (
+                                {sortedCalificaciones.map((c, i) => (
                                     <tr key={i} className="border-t border-gray-200 odd:bg-white even:bg-gray-50 hover:bg-gray-100">
                                         <td className="p-2 font-mono text-xs">{c.matricula}</td>
                                         <td className="p-2">{c.nombre}</td>

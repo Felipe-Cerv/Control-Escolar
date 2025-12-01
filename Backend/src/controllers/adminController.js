@@ -33,5 +33,15 @@ export const obtenerCalificacionesPorAlumno = async (req, res) => {
     }
 };
 
+export const inactivarCalificacion = async (req, res) => {
+  try {
+    const { calificacion_id } = req.params;
+    const result = await CalificacionService.inactivarCalificacion(calificacion_id);
+    return res.status(200).json({ ok: true, data: result });
+  } catch (error) {
+    if (error instanceof AppError) return res.status(error.status).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
+  }
+};
 
-export default { obtenerPromediosPorMateria, obtenerPromediosGeneral, obtenerCalificacionesPorAlumno};
+export default { obtenerPromediosPorMateria, obtenerPromediosGeneral, obtenerCalificacionesPorAlumno, inactivarCalificacion };

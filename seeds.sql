@@ -1,3 +1,21 @@
+
+ALTER TABLE alumnos
+ALTER COLUMN created_at SET DEFAULT now(),
+ALTER COLUMN updated_at SET DEFAULT now();
+
+ALTER TABLE usuarios
+ALTER COLUMN created_at SET DEFAULT now(),
+ALTER COLUMN updated_at SET DEFAULT now();
+
+ALTER TABLE materias
+ALTER COLUMN created_at SET DEFAULT now(),
+ALTER COLUMN updated_at SET DEFAULT now();
+
+ALTER TABLE calificaciones
+alter column fecha_registro set default now(),
+ALTER COLUMN created_at SET DEFAULT now(),
+ALTER COLUMN updated_at SET DEFAULT now();
+
 INSERT INTO usuarios (nombre, email, password_hash, fecha_nacimiento)
 VALUES
 ('Alumno 1', 'alumno1@example.com', '$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy', '2005-01-01'),
@@ -24,8 +42,8 @@ VALUES
 ('Maestro 2', 'maestro2@example.com', '$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy', '1980-02-01'),
 ('Maestro 3', 'maestro3@example.com', '$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy', '1980-03-01'),
 ('Maestro 4', 'maestro4@example.com', '$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy', '1980-04-01'),
-('Maestro 5', 'maestro5@example.com', '$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy', '1980-05-01');
-
+('Maestro 5', 'maestro5@example.com', '$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy', '1980-05-01'),
+('Admin1', 'admin1@example.com','$2a$10$hpYhIg45wyufQyzK88Ye.etLdkBcWB7pKBQmD/fxMsLOYiQcEoaZy','1980-05-01');
 
 insert into roles (descripcion)
 values
@@ -51,6 +69,8 @@ SELECT i, 3 FROM generate_series(1,20) AS s(i);
 INSERT INTO usuario_roles (usuario_id, rol_id)
 SELECT i, 2 FROM generate_series(21,25) AS s(i);
 
+INSERT INTO usuario_roles (usuario_id, rol_id)
+VALUES (26, 1);
 
 INSERT INTO alumnos (matricula, usuario_id)
 SELECT 'A' || lpad(i::text, 4, '0'), i FROM generate_series(1,20) AS s(i);
@@ -214,20 +234,4 @@ VALUES
 (20,4,1, 6.40, '', 1),
 (20,5,1, 7.37, '', 1);
 
-ALTER TABLE alumnos
-ALTER COLUMN created_at SET DEFAULT now(),
-ALTER COLUMN updated_at SET DEFAULT now();
-
-ALTER TABLE usuarios
-ALTER COLUMN created_at SET DEFAULT now(),
-ALTER COLUMN updated_at SET DEFAULT now();
-
-ALTER TABLE materias
-ALTER COLUMN created_at SET DEFAULT now(),
-ALTER COLUMN updated_at SET DEFAULT now();
-
-ALTER TABLE calificaciones
-alter column fecha_registro set default now(),
-ALTER COLUMN created_at SET DEFAULT now(),
-ALTER COLUMN updated_at SET DEFAULT now();
 

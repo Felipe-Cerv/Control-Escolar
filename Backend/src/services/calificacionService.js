@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize';
 import models, { sequelize } from '../models/index.js';
 import { MateriasService, fetchAllMaterias } from './materiasService.js';
+import { NotFoundError } from '../errors/NotFoundError.js';
 export class CalificacionService {
 
     async obtenerPromediosPorMateria(materiaIds) {
@@ -102,6 +103,7 @@ export class CalificacionService {
     async obtenerCalificacionesPorAlumno(alumno_id) {
         const result = await models.Calificacion.findAll({
             attributes: [
+                [Sequelize.col('calificacion_id'), 'calificacion_id'],
                 [Sequelize.col('grupo_materia_maestro->materia.codigo'), 'codigo'],
                 [Sequelize.col('grupo_materia_maestro->materia.nombre'), 'materia'],
                 [Sequelize.col('Calificacion.nota'), 'nota'],
@@ -139,13 +141,14 @@ export class CalificacionService {
                 }
             ],
             where: {
-                ['$alumno_grupo_periodo.alumno_id$']: alumno_id
+                ['$alumno_grupo_periodo.alumno_id$']: alumno_id, ['$estatus_calificacion_id$']: 1
             },
             raw: true
         });
 
         // Map results to clean format: codigo, materia, nota, maestro
         const mapped = result.map((row) => ({
+            calificacion_id: row.calificacion_id,
             codigo: row.codigo,
             materia: row.materia,
             nota: row.nota,
@@ -221,6 +224,17 @@ export class CalificacionService {
             { where: { calificacion_id } }
         );
         return;
+    }
+
+    async inactivarCalificacion(calificacion_id) {
+        const [affected] = await models.Calificacion.update(
+            { estatus_calificacion_id: 2 },
+            { where: { calificacion_id } }
+        );
+        if (!affected) {
+            throw new NotFoundError('No se encontró la calificación');
+        }
+        return { calificacion_id, estatus_calificacion_id: 2 };
     }
 }
 

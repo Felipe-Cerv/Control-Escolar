@@ -6,12 +6,38 @@ export default function CalificacionesAlumno() {
     const [matricula, setMatricula] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [success, setSuccess] = useState('')
     const [calificaciones, setCalificaciones] = useState<any[]>([])
     const [alumno, setAlumno] = useState<{
         nombre: string
         matricula: string
         grupo: string
     } | null>(null)
+    const [sortBy, setSortBy] = useState<'materia' | 'nota' | null>(null)
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+    const handleSort = (field: 'materia' | 'nota') => {
+        if (sortBy === field) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortBy(field)
+            setSortOrder('asc')
+        }
+    }
+
+    const sortedCalificaciones = [...calificaciones].sort((a, b) => {
+        if (!sortBy) return 0
+        
+        let comparison = 0
+        if (sortBy === 'materia') {
+            comparison = a.materia.localeCompare(b.materia)
+        } else if (sortBy === 'nota') {
+            comparison = parseFloat(a.nota) - parseFloat(b.nota)
+        }
+        
+        return sortOrder === 'asc' ? comparison : -comparison
+    })
+
     const promedioAlumno = calificaciones.length
         ? calificaciones.reduce((sum: number, c: any) => sum + (parseFloat(c.nota) || 0), 0) / calificaciones.length
         : 0
@@ -23,6 +49,7 @@ export default function CalificacionesAlumno() {
         }
         setLoading(true)
         setError('')
+        setSuccess('')
         try {
             const data = await adminService.getAlumnoPorMatricula(matricula)
             setAlumno({ nombre: data.nombre, matricula: data.matricula, grupo: data.grupo })
@@ -32,6 +59,25 @@ export default function CalificacionesAlumno() {
             setError(apiMsg || e.message || 'Error al obtener calificaciones')
             setAlumno(null)
             setCalificaciones([])
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleEliminar = async (calificacionId: number) => {
+        if (!confirm('¿Estás seguro de eliminar esta calificación?')) return
+        
+        setLoading(true)
+        setError('')
+        setSuccess('')
+        try {
+            await adminService.eliminarCalificacion(calificacionId)
+            setSuccess('Calificación eliminada con éxito')
+            setCalificaciones(prev => prev.filter(c => c.calificacion_id !== calificacionId))
+            setTimeout(() => setSuccess(''), 3000)
+        } catch (e: any) {
+            const apiMsg = e?.response?.data?.error || e?.response?.data?.message
+            setError(apiMsg || e.message || 'Error al eliminar calificación')
         } finally {
             setLoading(false)
         }
@@ -72,6 +118,11 @@ export default function CalificacionesAlumno() {
                         {error}
                     </div>
                 )}
+                {success && (
+                    <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-xl text-sm">
+                        {success}
+                    </div>
+                )}
                 {alumno && (
                     <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 flex items-center justify-between">
                         <div className="space-y-0.5">
@@ -92,18 +143,48 @@ export default function CalificacionesAlumno() {
                             <thead>
                                 <tr className="bg-gray-100 text-gray-700">
                                     <th className="p-2 text-center">Código</th>
-                                    <th className="p-2 text-center">Materia</th>
-                                    <th className="p-2 text-center">Nota</th>
+                                    <th className="p-2 text-center">
+                                        <button 
+                                            onClick={() => handleSort('materia')} 
+                                            className="flex items-center justify-center gap-1 w-full hover:text-indigo-600 transition-colors"
+                                        >
+                                            Materia
+                                            {sortBy === 'materia' && (
+                                                <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                                            )}
+                                        </button>
+                                    </th>
+                                    <th className="p-2 text-center">
+                                        <button 
+                                            onClick={() => handleSort('nota')} 
+                                            className="flex items-center justify-center gap-1 w-full hover:text-indigo-600 transition-colors"
+                                        >
+                                            Nota
+                                            {sortBy === 'nota' && (
+                                                <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                                            )}
+                                        </button>
+                                    </th>
                                     <th className="p-2 text-center">Maestro</th>
+                                    <th className="p-2 text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {calificaciones.map((c, i) => (
+                                {sortedCalificaciones.map((c, i) => (
                                     <tr key={i} className="border-t border-gray-200 odd:bg-white even:bg-gray-50 hover:bg-gray-100">
                                         <td className="p-2 font-mono text-xs">{c.codigo}</td>
                                         <td className="p-2">{c.materia}</td>
                                         <td className="p-2 font-semibold">{c.nota}</td>
                                         <td className="p-2">{c.maestro}</td>
+                                        <td className="p-2">
+                                            <button 
+                                                onClick={() => handleEliminar(c.calificacion_id)}
+                                                disabled={loading}
+                                                className="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white text-xs font-semibold"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

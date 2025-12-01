@@ -96,6 +96,11 @@ export const adminService = {
         const err = new Error(msg);
         ; (err as any).code = data?.code
         throw err
+    },
+
+    async eliminarCalificacion(calificacionId: number) {
+        const { data } = await axiosClient.delete(`/admin/calificaciones/${calificacionId}`)
+        return data
     }
 }
 

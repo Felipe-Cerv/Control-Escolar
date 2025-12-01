@@ -5,7 +5,7 @@ dotenv.config();
 const env = {
     port: process.env.PORT || 3000,
     db: {
-        host: process.env.DB_HOST,
+        host: process.env.MODE === 'dev' ? process.env.DB_HOST_TEST : process.env.DB_HOST,
         port: process.env.DB_PORT,
         name: process.env.DB_NAME,
         user: process.env.DB_USER,

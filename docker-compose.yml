@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: control-escolar-db
+    env_file:
+      - ./Backend/.env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - control-escolar-network
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: control-escolar-backend
+    env_file:
+      - ./Backend/.env
+    environment:
+      DB_HOST: db
+      NODE_ENV: production
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./seeds.sql:/app/seeds.sql
+    networks:
+      - control-escolar-network
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: control-escolar-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - control-escolar-network
+
+volumes:
+  postgres_data:
+
+networks:
+  control-escolar-network:
+    driver: bridge
